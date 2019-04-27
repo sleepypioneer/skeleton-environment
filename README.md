@@ -7,7 +7,7 @@ For learning purposes I have split the various stages of this into different bra
 
 ----
 
-### Python App 🐍
+### [Step One: Python App](https://github.com/sleepypioneer/skeleton-environment/tree/step_one_python_app) 🐍
 
 The starting point is the Python app it's self. Using the http.Server library the program returns a JSON of data when a GET request is made to the endpoint `/trees` 🌳 any other endpoint returns `404` error.
 
@@ -20,11 +20,70 @@ To run the program use the command `python main.py` from inside the `python_serv
 The port for the application is `8001` therefore if you run this locally you will be able to access the service at `localhost:8001/trees`
 
 
-There are tests that run with [pytest](https://docs.pytest.org/en/latest/) for this program you can run them with the command `python -m pytest tests/`
+There are tests inside `./python_server/tests` that run with [pytest](https://docs.pytest.org/en/latest/) for this program you can run them with the command `python -m pytest tests/`
 
 
 ----
 
-### Adding the App to our environment with Docker-Compose 🐋
+### [Step Two: Adding the App to our environment with Docker-Compose](https://github.com/sleepypioneer/skeleton-environment/tree/step_two_docker_compose) 🐋
 
 By adding a `dockerfile` to python_server we can define the app’s environment, so it can be reproduced anywhere. We can then use docker-compose to run our app in an isolated environment with the command `docker-compose up` don't forget to add the flag `--build` if changes have been made.
+
+
+----
+
+### [Step three: Building our project with Bazel](https://github.com/sleepypioneer/skeleton-environment/tree/step_three_bazel_build) 💚 
+
+We can use the build tool [Bazel](https://bazel.build/) in our environment so we can easily build our Python App and any additional services we decide to add in our environment.
+
+First we need a `WORKSPACE` file at the root, here are all the archive/ git repositories for python the main ones would be the `io_bazel_rules_python` but we will also need the `io__bazel_rules_docker` for running our app through docker.
+
+We will also already set up [Gazelle](https://github.com/bazelbuild/bazel-gazelle) a build file generator, primary for GO projects it will create the necessary files for our environment to be built using Bazel.
+
+When the archive has been imported and rule set loaded Gazelle can be run with `bazel run gazelle`.
+
+To run the Python App we will need to add to the `WORKSPACE` the necessary archives for python, the main ones being `io_bazel_rules_python` but we will also need the `io__bazel_rules_docker` for running our app through docker. Take a look through the complete ``WORKSPACE` file to see how this is done.
+
+We also need to add a `BUILD.bazel` file in the application folder. Here we define our rules. 
+
+```
+py_binary(
+    name = "server",
+    srcs = ["main.py"],
+    main = "main.py",
+    deps = [
+        # This takes the name as specified in requirements.txt
+        requirement("requests"),
+        requirement("prometheus_client"),
+    ],
+    python_version = "PY3",
+  )
+```
+
+Here we are stipulating we want to use Python 3 to get this to run correctly at runtime we also need to add a runtime rule *(otherwise you can hit problems where the Python being used is not the one stipulated)*
+
+```
+py_runtime(
+    name = "myruntime",
+    interpreter_path = select({
+        # Update paths as appropriate for your system.
+        "@bazel_tools//tools/python:PY2": "/usr/bin/python",
+        "@bazel_tools//tools/python:PY3": "/usr/bin/python3",
+    }),
+    files = [],
+)
+```
+
+To build the Python app with Bazel:
+
+`bazel run //python_server:server --python_top=//python_server:myruntime`
+
+The port will be the same as above and when run locally should be as before reachable at `localhost:8001/trees`.
+
+Our Docker version can be run with:
+
+`bazel run //python_server:server.image --python_top=//python_server:myruntime`
+
+In this case we will not see the logging until the process is stopped with `control c` but can check it's working at the same URL.
+
+----

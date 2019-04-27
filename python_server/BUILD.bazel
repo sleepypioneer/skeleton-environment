@@ -1,0 +1,42 @@
+package(default_visibility = ["//visibility:public"])
+
+load(
+    "@io_bazel_rules_python//python:python.bzl",
+    "py_binary",
+    "py_library",
+    "py_test",
+)
+load("@server_deps//:requirements.bzl", "requirement")
+load("@io_bazel_rules_docker//python3:image.bzl", "py3_image")
+
+py_runtime(
+    name = "myruntime",
+    interpreter_path = select({
+        # Update paths as appropriate for your system.
+        "@bazel_tools//tools/python:PY2": "/usr/bin/python",
+        "@bazel_tools//tools/python:PY3": "/usr/bin/python3",
+    }),
+    files = [],
+)
+
+py_binary(
+    name = "server",
+    srcs = ["main.py"],
+    main = "main.py",
+    deps = [
+        # This takes the name as specified in requirements.txt
+        requirement("requests"),
+    ],
+    python_version = "PY3",
+)
+
+py3_image(
+    name = "server.image",
+    srcs = ["main.py"],
+    main = "main.py",
+    deps = [
+        # This takes the name as specified in requirements.txt
+        requirement("requests"),
+    ],
+    python_version = "PY3",
+)
