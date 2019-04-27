@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+  pythonserver:
+    build: ./python_server
+    ports:
+      - "8001:8001"
+
+
+
