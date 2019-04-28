@@ -139,3 +139,18 @@ We add the following to where we want to increment our counter, in this case whe
 
 ----
 
+
+### [Adding Prometheus 🔥 and Grafana 📈 to our environment](https://github.com/sleepypioneer/skeleton-environment/tree/step_five_prometheus_and_grafana)
+
+Now that we have metrics running in our App we can add Prometheus to our environment so we can capture the metrics and query them. We will also add Grafana to the environment so we can create a dashboard. We do so by adding instances of both to our docker-compose file. 
+
+Now when we start the docker environment with `docker-compose up --build`
+
+The Python Server App is available at port: `8001`
+Prometheus is available at port: `9090`
+Grafana is available at port: `3000`
+
+In the `prometheus.yaml` we set Prometheus up to scrape the metrics from our Python App. Grafana is set up to scrape from prometheus. It requires a login this is defined in the `docker-compose.yaml`.
+
+
+----

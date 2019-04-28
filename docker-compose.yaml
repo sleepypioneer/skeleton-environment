@@ -6,5 +6,20 @@ services:
     ports:
       - "8001:8001"
 
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - "./system/prometheus.yaml:/etc/prometheus/prometheus.yml"
 
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - "GF_SECURITY_ADMIN_USER=myUser"
+      - "GF_SECURITY_ADMIN_PASSWORD=myPassword"
+    volumes:
+      - "./system/grafana_datasources.yaml:/etc/grafana/provisioning/datasources/prometheus_docker-compose.yaml"
 
