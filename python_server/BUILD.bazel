@@ -26,6 +26,7 @@ py_binary(
     deps = [
         # This takes the name as specified in requirements.txt
         requirement("requests"),
+        requirement("prometheus_client"),
     ],
     python_version = "PY3",
 )
@@ -37,6 +38,7 @@ py3_image(
     deps = [
         # This takes the name as specified in requirements.txt
         requirement("requests"),
+        requirement("prometheus_client"),
     ],
     python_version = "PY3",
 )

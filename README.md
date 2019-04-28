@@ -87,4 +87,55 @@ Our Docker version can be run with:
 
 In this case we will not see the logging until the process is stopped with `control c` but can check it's working at the same URL.
 
+
 ----
+
+### [Adding Metrics to our App with the Python Prometheus Client](https://github.com/sleepypioneer/skeleton-environment/tree/step_four_adding_metrics) 🔥
+
+Using the [Python Prometheus Client](https://github.com/prometheus/client_python) we can scrape metrics from our Python App. First we will need to add an endpoint to view them on. Instead of [BaseHTTPRequest](https://docs.python.org/2/library/basehttpserver.html) we can use MetricsHandle](https://github.com/prometheus/client_python/blob/3cb4c9247f3f08dfbe650b6bdf1f53aa5f6683c1/prometheus_client/exposition.py#L141) wrapper class. This allow us to then set a `/metrics` endpoint.
+
+```
+elif endpoint == '/metrics':  
+  return super(HTTPRequestHandler, self).do_GET()
+```
+
+*(Be wary of issues with HTTP 1:1 : https://github.com/prometheus/client_python/issues/299)*
+
+We can now implement a metric in our Python App using the prometheus metric types, we will start with the counter.
+
+#### Counter ⏲️
+Counters go up, and reset when the process restarts.
+
+```
+from prometheus_client import Counter
+c = Counter('my_failures', 'Description of counter')
+c.inc()     # Increment by 1
+c.inc(1.6)  # Increment by given value
+```
+
+https://github.com/prometheus/client_python#counter
+
+
+#### labels 🏷️
+
+... Labels can also be passed as keyword-arguments:
+
+```
+from prometheus_client import Counter
+c = Counter('my_requests_total', 'HTTP Failures', ['method', 'endpoint'])
+c.labels(method='get', endpoint='/').inc()
+c.labels(method='post', endpoint='/submit').inc()
+```
+
+https://github.com/prometheus/client_python#labels
+
+`c = Counter('requests_total', 'requests', ['status', 'endpoint'])`
+
+#### Adding the counter to our App 📈
+
+We add the following to where we want to increment our counter, in this case when a request to the `/trees` endpoint is made. In this example the values for the labels are hardcoded in.
+
+`c.labels(status='200', endpoint='/trees').inc()`
+
+----
+

@@ -1,15 +1,19 @@
 import time
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from prometheus_client import Counter, MetricsHandler
+
+c = Counter('requests_total', 'requests', ['status', 'endpoint'])
 
 HOST_NAME = '0.0.0.0' # This will map to avialable port in docker
 PORT_NUMBER = 8001
 
 
-class HTTPRequestHandler(BaseHTTPRequestHandler):
+class HTTPRequestHandler(MetricsHandler):
     def get_trees(self):
         self.do_HEAD()
         self.wfile.write(bytes(json.dumps({"myFavouriteTree":"Oak"}), 'utf-8'))
+        c.labels(status='200', endpoint='/trees').inc()
 
     def do_HEAD(self):
         self.send_response(200)
@@ -20,6 +24,8 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
         endpoint = self.path
         if endpoint == '/trees':
             return self.get_trees()
+        elif endpoint == '/metrics':
+            return super(HTTPRequestHandler, self).do_GET()
         else:
             self.send_response(404)
             self.send_header('Content-type', 'text/html')
