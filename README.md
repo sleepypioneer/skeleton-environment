@@ -137,8 +137,8 @@ We add the following to where we want to increment our counter, in this case whe
 
 `c.labels(status='200', endpoint='/trees').inc()`
 
-----
 
+----
 
 ### [Adding Prometheus 🔥 and Grafana 📈 to our environment](https://github.com/sleepypioneer/skeleton-environment/tree/step_five_prometheus_and_grafana)
 
@@ -154,3 +154,39 @@ In the `prometheus.yaml` we set Prometheus up to scrape the metrics from our Pyt
 
 
 ----
+
+### [Deploying to Kubernetes](https://github.com/sleepypioneer/skeleton-environment/tree/step_six_deploying_to_kubernetes) ⚙️
+
+In this step we will deploy our Python App in [Kubernetes](https://kubernetes.io/) locally using [MiniKube](https://kubernetes.io/docs/setup/minikube/).
+
+First we need to build an image of our Python App using the `docker build -t sleepypioneer/pythonserver .` command inside the Python App folder which follows what we have defined in our `dockerfile`. we choose the tag sleepypioneer/pythonserver as it responds to <docker-hub-name>/<project-name> this is an optimisation for when we want to publish the image to [Docker Hub](https://hub.docker.com) with `docker push`.
+
+We can then push this to Docker Hub with the following command pattern:
+
+`docker login` log into docker hub account
+
+`docker push sleepypioneer/pythonserver`
+
+We will need to install MiniKube and additionaly we will need [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+
+To start MiniKube run `minikube start`.
+
+If we now run `kubectx` we will see that we are now in the `minikube` context.
+
+#### Create deployment:
+`kubectl create deployment pythonserver --image=gcr.io/hello-minikube-zero-install/hello-node`
+
+`kubectl get deployments`
+`kubectl get pods`
+
+#### Create service:
+`kubectl expose deployment pythonserver --type=LoadBalancer --port=8080`
+
+*"The --type=LoadBalancer flag indicates that you want to expose your Service outside of the cluster."*
+
+`kubectl get services`
+`kubectl cluster-info`
+`kubectl delete service pythonserver`
+
+#### Run service:
+`minikube service pythonserver`
