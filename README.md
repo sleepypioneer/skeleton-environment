@@ -77,13 +77,13 @@ py_runtime(
 
 To build the Python app with Bazel:
 
-`bazel run //python_server:server --experimental_better_python_version_mixing --python_top=//python_server:myruntime`
+`bazel run //python_server:server --python_top=//python_server:myruntime`
 
 The port will be the same as above and when run locally should be as before reachable at `localhost:8001/trees`.
 
 Our Docker version can be run with:
 
-`bazel run //python_server:server.image --experimental_better_python_version_mixing --python_top=//python_server:myruntime`
+`bazel run //python_server:server.image --python_top=//python_server:myruntime`
 
 In this case we will not see the logging until the process is stopped with `control c` but can check it's working at the same URL.
 
@@ -174,19 +174,29 @@ To start MiniKube run `minikube start`.
 If we now run `kubectx` we will see that we are now in the `minikube` context.
 
 #### Create deployment:
-`kubectl create deployment pythonserver --image=gcr.io/hello-minikube-zero-install/hello-node`
+`kubectl create deployment pythonserver --image=sleepypioneer/pythonserver`
 
-`kubectl get deployments`
+`kubectl get deployments`  
 `kubectl get pods`
 
 #### Create service:
-`kubectl expose deployment pythonserver --type=LoadBalancer --port=8080`
+`kubectl expose deployment pythonserver --type=LoadBalancer --port=8001`
 
 *"The --type=LoadBalancer flag indicates that you want to expose your Service outside of the cluster."*
 
-`kubectl get services`
-`kubectl cluster-info`
+###### Useful commands
+`kubectl get services`  
+`kubectl cluster-info`  
 `kubectl delete service pythonserver`
 
+#### Run the Minikube Dashboard:
+`minikube dashboard` Opens the dashboard in the browser, you can use it to see your services/deployments/pods and check the health of your cluster as well workloads.
+
 #### Run service:
-`minikube service pythonserver`
+`minikube service pythonserver` Will open the service up inside the browser. You can also use the `--url=true` flag to return the URL the service is running at instead of opening it in the default browser.
+
+#### Scale up - add more replicas(pods) of our service:
+`kubectl scale deploy pythonserver --replicas=2` 
+
+### Diagram of how our cluster looks:
+<img src="/documentation/skeleton-project-cluster-diagram.png"/>
