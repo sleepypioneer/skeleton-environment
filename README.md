@@ -194,3 +194,9 @@ If we now run `kubectx` we will see that we are now in the `minikube` context.
 
 #### Run service:
 `minikube service pythonserver` Will open the service up inside the browser. You can also use the `--url=true` flag to return the URL the service is running at instead of opening it in the default browser.
+
+#### Scale up - add more replicas(pods) of our service:
+`kubectl scale deploy pythonserver --replicas=2` 
+
+### Diagram of how our cluster looks:
+<img src="/documentation/skeleton-project-cluster-diagram.png"/>
