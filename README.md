@@ -200,3 +200,76 @@ If we now run `kubectx` we will see that we are now in the `minikube` context.
 
 ### Diagram of how our cluster looks:
 <img src="/documentation/skeleton-project-cluster-diagram.png"/>
+
+
+---
+
+### [Deploying Prometheus to Kubernetes & exposing Services](https://github.com/sleepypioneer/skeleton-environment/tree/step_seven_prometheus_in_kubernetes) ⚙️
+
+Now we have our service running in the cluster we want to add Prometheus and eventually Grafana. We will also need to make sure our Python Server is configured to expose it's metrics. To this we will use a number of `yaml` files to create ClusterRoles, Configmaps, Deployments, and Services.
+
+We will start with the Python Server inside the folder `python_server` there are two files `deployment.yaml` and `service.yaml` we can use these to deploy our Python Server instead of using the bash commands we used in the previous section.
+
+First we will remove the previous deployment by running the command:  
+```bash
+kubectl delete deployment/pythonserver
+```  
+*(This will delete the deployment, service and pods we created in the last section.)*
+
+Now we will create the new deployment using the `deployment.yaml` file we do so by running the following file inside the `python_server` folder: 
+```bash 
+kubectl apply -f deployment.yaml  
+```
+
+In the same folder now run:  
+```bash
+kubectl apply -f service.yaml
+```
+
+This will create the service and pods for the Python Server deployment, they will be almost identical to what we created previously the only difference is that we have now added annotations to the pods to allow prometheus to scrape the `/metrics` endpoint. This can be seen in the `deployments.yaml` file in the template section.
+
+```yaml
+template:  
+     metadata:  
+        annotations:  
+          prometheus.io/scrape: 'true'  
+```
+
+Now that we have the Python Server running in the cluster with prometheus scrape annotation we can move on to deploying the Prometheus Service itself. We will set up a `monitoring` namespace for our Prometheus and Grafana pods to live in, to do this run the following command from inside the `/system/monitoring/` folder.
+
+```bash
+kubectl apply -f namespace.yaml
+```
+
+Now if you run `kubens` you will see there is a namespace called `monitoring`. We also need to create a ClusterRole so that Prometheus has the correct permissions to be able to scrape other resources. Still in the `/system/monitoring/` folder run:  
+
+```bash
+kubectl apply -f rbac.yml
+```
+
+Next we will create the configmap if you look at the `prometheus-configmap.yaml` you will see that this file used regex to be able to scrape different resources and assign them labels (when we look in prometheus you will see where these labels get used). *Note that we assign it to the monitoring namespace.*
+
+```bash
+kubectl apply -f prometheus-configmap.yaml --namespace=monitoring
+```
+
+Now we can create the Prometheus deployment:  
+```bash
+kubectl apply -f prometheus-deployment.yaml --namespace=monitoring
+```
+
+And Prometheus Service:  
+```bash
+kubectl apply -f prometheus-service.yaml --namespace=monitoring
+```
+
+If we run `minikube service prometheus-service  --namespace=monitoring` prometheus will now open in the default browser. If we search for the `request_total` metric which we created for our Python Server we should see it, unless you have been making calls to the Python Server endpoint there will be no values for the metric.
+
+Next we will deploy Grafana in a similar pattern. We do not need a ClusterRole for this one just a deployment and service. Still inside the `/system/monitoring/` folder run:  
+
+```bash
+kubectl apply -f grafana-deployment.yaml --namespace=monitoring  
+kubectl apply -f grafana-service.yaml --namespace=monitoring  
+```
+
+We can run the service with `minikube service grafana  --namespace=monitoring` you will still need to sign in as before (default username and password is admin/admin).

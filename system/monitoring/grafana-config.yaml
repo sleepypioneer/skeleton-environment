@@ -1,0 +1,18 @@
+# config file version
+apiVersion: 1
+kind: ConfigMap
+metadata:
+  name: grafana_datasources
+  labels:
+    name: grafana_datasources
+data:
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      access: proxy
+      url: http://prometheus:9090
+      isDefault: true
+      version: 1
+      editable: false

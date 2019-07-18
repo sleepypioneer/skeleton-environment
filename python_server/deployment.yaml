@@ -1,0 +1,23 @@
+ apiVersion: extensions/v1beta1
+ kind: Deployment
+ metadata:
+  name: python-server-deployment
+  namespace: default
+ spec:
+   replicas: 1
+   selector:
+     matchLabels:
+       app: pythonserver
+   template:
+     metadata:
+        annotations:
+          prometheus.io/scrape: 'true'
+        labels:
+          app: pythonserver
+     spec:
+      containers:
+      - name: pythonserver
+        image: sleepypioneer/pythonserver:latest
+        imagePullPolicy: "IfNotPresent"
+        ports:
+        - containerPort: 8001
