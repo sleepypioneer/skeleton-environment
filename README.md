@@ -47,7 +47,7 @@ To run the Python App we will need to add to the `WORKSPACE` the necessary archi
 
 We also need to add a `BUILD.bazel` file in the application folder. Here we define our rules. 
 
-```
+```yaml
 py_binary(
     name = "server",
     srcs = ["main.py"],
@@ -63,7 +63,7 @@ py_binary(
 
 Here we are stipulating we want to use Python 3 to get this to run correctly at runtime we also need to add a runtime rule *(otherwise you can hit problems where the Python being used is not the one stipulated)*
 
-```
+```yaml
 py_runtime(
     name = "myruntime",
     interpreter_path = select({
@@ -90,11 +90,11 @@ In this case we will not see the logging until the process is stopped with `cont
 
 ----
 
-### [Adding Metrics to our App with the Python Prometheus Client](https://github.com/sleepypioneer/skeleton-environment/tree/step_four_adding_metrics) 🔥
+### [ Step Four: Adding Metrics to our App with the Python Prometheus Client](https://github.com/sleepypioneer/skeleton-environment/tree/step_four_adding_metrics) 🔥
 
 Using the [Python Prometheus Client](https://github.com/prometheus/client_python) we can scrape metrics from our Python App. First we will need to add an endpoint to view them on. Instead of [BaseHTTPRequest](https://docs.python.org/2/library/basehttpserver.html) we can use MetricsHandle](https://github.com/prometheus/client_python/blob/3cb4c9247f3f08dfbe650b6bdf1f53aa5f6683c1/prometheus_client/exposition.py#L141) wrapper class. This allow us to then set a `/metrics` endpoint.
 
-```
+```sh
 elif endpoint == '/metrics':  
   return super(HTTPRequestHandler, self).do_GET()
 ```
@@ -106,7 +106,7 @@ We can now implement a metric in our Python App using the prometheus metric type
 #### Counter ⏲️
 Counters go up, and reset when the process restarts.
 
-```
+```sh
 from prometheus_client import Counter
 c = Counter('my_failures', 'Description of counter')
 c.inc()     # Increment by 1
@@ -120,7 +120,7 @@ https://github.com/prometheus/client_python#counter
 
 ... Labels can also be passed as keyword-arguments:
 
-```
+```sh
 from prometheus_client import Counter
 c = Counter('my_requests_total', 'HTTP Failures', ['method', 'endpoint'])
 c.labels(method='get', endpoint='/').inc()
@@ -140,7 +140,7 @@ We add the following to where we want to increment our counter, in this case whe
 
 ----
 
-### [Adding Prometheus 🔥 and Grafana 📈 to our environment](https://github.com/sleepypioneer/skeleton-environment/tree/step_five_prometheus_and_grafana)
+### [Step Five: Adding Prometheus 🔥 and Grafana 📈 to our environment](https://github.com/sleepypioneer/skeleton-environment/tree/step_five_prometheus_and_grafana)
 
 Now that we have metrics running in our App we can add Prometheus to our environment so we can capture the metrics and query them. We will also add Grafana to the environment so we can create a dashboard. We do so by adding instances of both to our docker-compose file. 
 
@@ -155,7 +155,7 @@ In the `prometheus.yaml` we set Prometheus up to scrape the metrics from our Pyt
 
 ----
 
-### [Deploying to Kubernetes](https://github.com/sleepypioneer/skeleton-environment/tree/step_six_deploying_to_kubernetes) ⚙️
+### [Step Six: Deploying to Kubernetes](https://github.com/sleepypioneer/skeleton-environment/tree/step_six_deploying_to_kubernetes) ⚙️
 
 In this step we will deploy our Python App in [Kubernetes](https://kubernetes.io/) locally using [MiniKube](https://kubernetes.io/docs/setup/minikube/).
 
@@ -199,12 +199,12 @@ If we now run `kubectx` we will see that we are now in the `minikube` context.
 `kubectl scale deploy pythonserver --replicas=2` 
 
 ### Diagram of how our cluster looks:
-<img src="/documentation/skeleton-project-cluster-diagram.png"/>
+<img src="/documentation/images/skeleton-project-cluster-diagram.png"/>
 
 
 ---
 
-### [Deploying Prometheus to Kubernetes & exposing Services](https://github.com/sleepypioneer/skeleton-environment/tree/step_seven_prometheus_in_kubernetes) ⚙️
+### [Step Seven: Deploying Prometheus to Kubernetes & exposing Services](https://github.com/sleepypioneer/skeleton-environment/tree/step_seven_prometheus_in_kubernetes) ⚙️
 
 Now we have our service running in the cluster we want to add Prometheus and eventually Grafana. We will also need to make sure our Python Server is configured to expose it's metrics. To this we will use a number of `yaml` files to create ClusterRoles, Configmaps, Deployments, and Services.
 
@@ -272,4 +272,18 @@ kubectl apply -f grafana-deployment.yaml --namespace=monitoring
 kubectl apply -f grafana-service.yaml --namespace=monitoring  
 ```
 
-We can run the service with `minikube service grafana  --namespace=monitoring` you will still need to sign in as before (default username and password is admin/admin).
+We can run the service with `minikube service grafana  --namespace=monitoring` you will still need to sign in as before (default username and password is admin/admin you will then be asked to change it).
+
+Inside the Grafana UI we can now set a data source and create Dashboards with the metrics from our Python Server App. You can follow along some instructions [here](/documentation/grafana-tutorial.md) to get started and if you would like to find out more I can reccomend the [Grafana documentation](https://grafana.com/docs/guides/getting_started/).
+
+#### Resources:
+* Medium Article "How to Deploy Grafana & Prometheus in Kubernetes Cluster."  
+<https://medium.com/@_oleksii_/how-to-deploy-grafana-prometheus-in-kubernetes-cluster-219d23e4574f>
+* sebastiandaschner blog "Discover applications running on Kubernetes with Prometheus"
+<https://blog.sebastian-daschner.com/entries/prometheus-kubernetes-discovery>
+* linuxacademy "Running Prometheus on Kubernetes"
+<https://linuxacademy.com/blog/kubernetes/running-prometheus-on-kubernetes/>
+* Medium Article "How to monitor your Kubernetes cluster with Prometheus and Grafana (The short story)"
+<https://medium.com/@chris_linguine/how-to-monitor-your-kubernetes-cluster-with-prometheus-and-grafana-2d5704187fc8>
+* Devopscube "How To Setup Prometheus Monitoring On Kubernetes Cluster"
+<https://devopscube.com/setup-prometheus-monitoring-on-kubernetes/>
