@@ -199,7 +199,7 @@ If we now run `kubectx` we will see that we are now in the `minikube` context.
 `kubectl scale deploy pythonserver --replicas=2` 
 
 ### Diagram of how our cluster looks:
-<img src="/documentation/skeleton-project-cluster-diagram.png"/>
+<img src="/documentation/images/skeleton-project-cluster-diagram.png"/>
 
 
 ---
@@ -272,4 +272,6 @@ kubectl apply -f grafana-deployment.yaml --namespace=monitoring
 kubectl apply -f grafana-service.yaml --namespace=monitoring  
 ```
 
-We can run the service with `minikube service grafana  --namespace=monitoring` you will still need to sign in as before (default username and password is admin/admin).
+We can run the service with `minikube service grafana  --namespace=monitoring` you will still need to sign in as before (default username and password is admin/admin you will then be asked to change it).
+
+Inside the Grafana UI we can now set a data source and create Dashboards with the metrics from our Python Server App. You can follow along some instructions [here](/documentation/grafana-tutorial.md) to get started and if you would like to find out more I can reccomend the [Grafana documentation](https://grafana.com/docs/guides/getting_started/).
